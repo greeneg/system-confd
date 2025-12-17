@@ -243,9 +243,10 @@ func main() {
 	}
 	// Cleanup the sockfile.
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		<-c
+		sig := <-c
+		logger.Info("Caught signal " + sig.String() + ", cleaning up and exiting...")
 		err = os.Remove(socketPath)
 		if err != nil && !os.IsNotExist(err) {
 			if os.IsNotExist(err) {
@@ -254,7 +255,7 @@ func main() {
 			}
 			logger.Error("Error removing socket file: " + socketPath + " " + err.Error())
 		}
-		os.Exit(1)
+		os.Exit(0)
 	}()
 
 	// Create server with timeouts to prevent slowloris attacks

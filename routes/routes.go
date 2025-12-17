@@ -13,18 +13,7 @@ func Static(g *gin.RouterGroup, s *controllers.SystemConfd) {
 	g.GET("/health", s.HealthCheck)
 	g.GET("/version", s.Version)
 	g.GET("/config", s.GetConfig)
-
-	/*
-		// Plugin routes
-		g.GET("/plugins", s.GetPlugins)
-		g.POST("/plugins/enable/:name", s.EnablePlugin)
-		g.POST("/plugins/disable/:name", s.DisablePlugin)
-
-		// System information routes
-		g.GET("/system/info", s.GetSystemInfo)
-		g.GET("/system/services", s.GetServices)
-	*/
 }
 
-func SetupRoutes(g *gin.RouterGroup, s *controllers.SystemConfd, pRegistry globals.PluginRegstry) {
+func SetupRoutes(g *gin.RouterGroup, s *controllers.SystemConfd, pRegistry globals.PluginRegistry) {
 }

@@ -67,8 +67,8 @@ func getConfig(configDir string) (globals.Config, error) {
 	return config, nil
 }
 
-func getPluginRegistry(pluginRegistryFile string, configDir string, logger Logger) (globals.PluginRegstry, error) {
-	registry := globals.PluginRegstry{}
+func getPluginRegistry(pluginRegistryFile string, configDir string, logger Logger) (globals.PluginRegistry, error) {
+	registry := globals.PluginRegistry{}
 
 	// Load the plugin registry file
 	var registryFile string
@@ -77,7 +77,7 @@ func getPluginRegistry(pluginRegistryFile string, configDir string, logger Logge
 	cleanPath := filepath.Clean(pluginRegistryFile)
 	absPath, err := filepath.Abs(cleanPath)
 	if err != nil {
-		return globals.PluginRegstry{}, err
+		return globals.PluginRegistry{}, err
 	}
 
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
@@ -89,11 +89,11 @@ func getPluginRegistry(pluginRegistryFile string, configDir string, logger Logge
 		cleanRegistryFile := filepath.Clean(registryFile)
 		absRegistryFile, err := filepath.Abs(cleanRegistryFile)
 		if err != nil {
-			return globals.PluginRegstry{}, err
+			return globals.PluginRegistry{}, err
 		}
 
 		if _, err := os.Stat(absRegistryFile); os.IsNotExist(err) {
-			return globals.PluginRegstry{}, err
+			return globals.PluginRegistry{}, err
 		}
 		pluginRegistryFile = absRegistryFile
 	} else {
@@ -103,10 +103,19 @@ func getPluginRegistry(pluginRegistryFile string, configDir string, logger Logge
 	logger.Info("Loading plugin registry from: " + pluginRegistryFile)
 	jsonContent, err := os.ReadFile(pluginRegistryFile)
 	if err != nil {
-		return globals.PluginRegstry{}, err
+		return globals.PluginRegistry{}, err
 	}
 	if err := json.Unmarshal([]byte(jsonContent), &registry); err != nil {
-		return globals.PluginRegstry{}, err
+		return globals.PluginRegistry{}, err
+	}
+
+	_, err = registry.ValidatePluginRegistryVersion(pluginRegistryFile)
+	if err != nil {
+		return globals.PluginRegistry{}, err
+	}
+	err = registry.ValidatePlugins()
+	if err != nil {
+		return globals.PluginRegistry{}, err
 	}
 
 	logger.Info("Loaded plugin registry from: " + pluginRegistryFile + " with " + strconv.Itoa(len(registry.Plugins)) + " plugins")
@@ -118,8 +127,8 @@ func checkForPluginDir(pluginDir string) error {
 	// of the individual plugin
 	if _, err := os.Stat(pluginDir); os.IsNotExist(err) {
 		// test for the plugin path from the registry
-		for _, plugin := range pluginRegstry.Plugins {
-			if plugin.Enabled {
+		for _, plugin := range pluginRegistry.Plugins {
+			if plugin.IsEnabled() {
 				if _, err := os.Stat(plugin.Path); os.IsNotExist(err) {
 					return err
 				}
@@ -143,7 +152,7 @@ func getPluginDir(plugin globals.Plugin) string {
 // global variables
 var config globals.Config
 var configDir string
-var pluginRegstry globals.PluginRegstry
+var pluginRegistry globals.PluginRegistry
 
 func main() {
 	// are we running as root?
@@ -216,7 +225,7 @@ func main() {
 	routes.Static(staticGroup, SystemConfd)
 
 	// set up the plugin routes
-	pluginGroup := r.Group("/api/v1/system/plugins")
+	pluginGroup := r.Group("/api/v1/system")
 	routes.SetupRoutes(pluginGroup, SystemConfd, pluginRegstry)
 
 	// set up our socket

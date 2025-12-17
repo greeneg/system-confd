@@ -14,7 +14,7 @@ build:
 			echo "Building for $$platform on $$arch..."; \
 			# Simulate build command \
 			mkdir -p build/$$platform-$$arch; \
-			GOARCH=$$arch GOOS=$$platform go build -o build/$$platform-$$arch/systemconfd; \
+			GOARCH=$$arch GOOS=$$platform go build -o build/$$platform-$$arch/system-confd; \
 		done; \
 	done
 	@echo "Build completed."

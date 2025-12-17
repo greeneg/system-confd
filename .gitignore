@@ -33,3 +33,4 @@ go.work.sum
 
 # don't track binary files
 system-confd
+build/

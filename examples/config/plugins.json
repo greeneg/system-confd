@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "plugins": [
+    {
+      "name": "keyboard",
+      "path": "/usr/lib/system-confd/plugins/keyboard/keyboard",
+      "metadata": "/usr/lib/system-confd/plugins/keyboard/keyboard.meta.json",
+      "enabled": true
+    },
+    {
+      "name": "locale",
+      "path": "/usr/lib/system-confd/plugins/locale/locale",
+      "metadata": "/usr/lib/system-confd/plugins/locale/locale.meta.json",
+      "enabled": false
+    }
+  ]
+}

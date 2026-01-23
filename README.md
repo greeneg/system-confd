@@ -51,6 +51,7 @@ Example keyboard.meta.json:
   "description": "Keyboard configuration plugin",
   "author": "Gary L. Greene, Jr. <greeneg@yggdrasilsoft.com>",
   "license": "GPL-3.0",
+  "supportsRootTargets": true,
   "apiPaths": {
     "/discover": {
       "method": "GET",
@@ -204,6 +205,7 @@ All metadata JSON files must have the following attributes:
 | description | string | | The description of what the plugin manages |
 | author | name and email address string | | The author name and email address |
 | license | SPDX identifier string | | The SPDX identifier string that matches the license of the plugin |
+| supportsRootTargets | boolean | | Whether the plugin supports using a different root path for configuration changes |
 | apiPaths | API endpoint object | | The API dynamic endpoint definition of the plugin. The object's payload is discussed in a later part of this README |
 
 The valid list of API mount points:
@@ -231,6 +233,7 @@ The **action object**, as described above, details the internal function call an
 | Key | Type | Accepted Values | Description |
 | --- | --- | --- | --- |
 | pluginProtocol | integer | 1 | The version of the plugin protocol to use for enforcing the attributes which must be present |
+| rootTarget | string | | The full path to the targeted OS root to make changes on. This is only supported on plugins that support using a different OS root than `/` |
 | action | string | one of the following:<br />- discovery<br />- readConfig<br />- setConfig | The action that maps to the internal plugin function to call |
 | values | attribute object | | The object that describes the attributes that are allowed to be set |
 
@@ -256,7 +259,8 @@ Using our previous example of the `keyboard` plugin, lets take a look at the for
 ```json
 {
     "version": 1,
-    "action": "discover"
+    "action": "discover",
+    "rootTarget": "/"
 }
 ```
 
@@ -268,10 +272,12 @@ In a `setConfiguration` action request, you'll see something like so:
 {
     "version": 1,
     "action": "setConfiguration",
+    "rootTarget": "/",
     "payload": {
-
+        "numLockEnable": "on"
     }
 }
 ```
 
 #### Outputs
+

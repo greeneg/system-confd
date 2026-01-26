@@ -266,18 +266,63 @@ Using our previous example of the `keyboard` plugin, lets take a look at the for
 
 This simple input JSON tells the plugin to run the discover endpoint code, which will return a discover output JSON with the data described in the metadata for the plugin.
 
-In a `setConfiguration` action request, you'll see something like so:
+In a `setConfig` action request, you'll see something like so:
 
 ```json
 {
     "version": 1,
-    "action": "setConfiguration",
+    "action": "setConfig",
     "rootTarget": "/",
-    "payload": {
+    "attributes": {
         "numLockEnable": "on"
     }
 }
 ```
+
+This simple request asks the plugin to set the `numLockEnable` keyboard setting to `on`, and stores its configuration appropriately for the given Linux distribution the computer is running.
+
+Finally, in a `readConfig` action request, you'll see something similar to this:
+
+```json
+{
+    "version": 1,
+    "action": "readConfig",
+    "rootTarget": "/",
+    "attributes": [
+        "numLockEnable"
+    ]
+}
+```
+
+This request returns the value of the `numLockEnable` setting.
+
+The structure of the three input JSONs are based on the following attributes detailed in the table below.
+
+**Fig. 1**: Structure of a discovery object
+
+| Key | Type | Accepted Values | Description |
+| --- | --- | --- | --- |
+| version | Integer | 1 | The version of the plugin protocol |
+| action | String | discovery | The action that maps to the internal function to call in the plugin |
+| rootTarget | String | | The full path to the targeted OS root to make changes on. This is only supported on plugins that support using a different OS root than `/` |
+
+**Fig. 2**: Structure of a setConfig object
+
+| Key | Type | Accepted Values | Description |
+| --- | --- | --- | --- |
+| version | Integer | 1 | The version of the plugin protocol |
+| action | String | setConfig | The action that maps to the internal function to call in the plugin |
+| rootTarget | String | | The full path to the targeted OS root to make changes on. This is only supported on plugins that support using a different OS root than `/` |
+| attributes | Object of key/value entries | | The attributes to set. Note that these are specific to the plugin. |
+
+**Fig. 3**: Structure of a readConfig object
+
+| Key | Type | Accepted Values | Description |
+| --- | --- | --- | --- |
+| version | Integer | 1 | The version of the plugin protocol |
+| action | String | setConfig | The action that maps to the internal function to call in the plugin |
+| rootTarget | String | | The full path to the targeted OS root to make changes on. This is only supported on plugins that support using a different OS root than `/` |
+| attributes | List | | The list of attributes that are desired to be returned. |
 
 #### Outputs
 

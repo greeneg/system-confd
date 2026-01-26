@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "name": "keyboard",
+  "apiMountPoint": "/hardware",
+  "apiName": "keyboard",
+  "description": "Keyboard configuration plugin",
+  "author": "Gary Greene",
+  "license": "GPL-3.0",
+  "paths": [
+    "/discover",
+    "/read"
+  ],
+  "apiPaths": {
+    "/discover": {
+      "method": "GET",
+      "description": "List keyboards attached to the system",
+      "actionObject": {
+        "pluginProtocol": 1,
+        "action": "discover"
+      }
+    },
+    "/readConfig": {
+      "method": "GET",
+      "description": "Retrieve the current keyboard input configuration",
+      "actionObject": {
+        "pluginProtocol": 1,
+        "action": "readConfig"
+      }
+    }
+  }
+}

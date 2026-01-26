@@ -19,6 +19,7 @@ import (
 	"github.com/greeneg/system-confd/controllers"
 	"github.com/greeneg/system-confd/globals"
 	"github.com/greeneg/system-confd/routes"
+	"github.com/greeneg/system-confd/simplelogger"
 )
 
 func getConfigDir() (string, error) {
@@ -67,7 +68,7 @@ func getConfig(configDir string) (globals.Config, error) {
 	return config, nil
 }
 
-func getPluginRegistry(pluginRegistryFile string, configDir string, logger Logger) (globals.PluginRegistry, error) {
+func getPluginRegistry(pluginRegistryFile string, configDir string, logger simplelogger.Logger) (globals.PluginRegistry, error) {
 	registry := globals.PluginRegistry{}
 
 	// Load the plugin registry file
@@ -177,7 +178,7 @@ func main() {
 	}
 
 	// set up our logger
-	logger, err := setupLogger(config)
+	logger, err := simplelogger.SetupLogger(config.General.LogLevel)
 	if err != nil {
 		panic("Error setting up logger: " + err.Error())
 	}
@@ -204,7 +205,8 @@ func main() {
 	for _, plugin := range pluginRegstry.Plugins {
 		if plugin.Enabled {
 			pluginDir := getPluginDir(plugin)
-			pluginPath := filepath.Join(pluginDir, plugin.Name)
+			pluginPath := filepath.Join(pluginDir, plugin.Name+"/"+plugin.Name+".plugin")
+			logger.Info("Plugin path: " + pluginPath)
 			if _, err := os.Stat(pluginDir); os.IsNotExist(err) {
 				logger.Error("Plugin directory not found: " + pluginDir)
 			} else {
@@ -226,7 +228,7 @@ func main() {
 
 	// set up the plugin routes
 	pluginGroup := r.Group("/api/v1/system")
-	routes.SetupRoutes(pluginGroup, SystemConfd, pluginRegstry)
+	routes.SetupRoutes(pluginGroup, SystemConfd, pluginRegstry, logger)
 
 	// set up our socket
 	socketPath := config.General.SocketPath

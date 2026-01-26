@@ -1,13 +1,13 @@
-package main
+package simplelogger
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/greeneg/system-confd/globals"
 )
 
 var logFormatString = "2006/01/02 15:04:05"
@@ -45,26 +45,26 @@ func createLogDir(logFile string) error {
 	return nil
 }
 
-func setupLogger(config globals.Config) (Logger, error) {
+func SetupLogger(loglvl string) (Logger, error) {
 	var logger Logger
 
 	// Set log level
-	logger.Level = config.General.LogLevel
+	logger.Level = loglvl
 	if logger.Level == "" {
 		logger.Level = "info" // default log level
 		setGinLogMode(logger.Level)
 	}
 
 	// Set log target
-	if config.General.LogFile != "" {
-		err := createLogDir(config.General.LogFile)
+	if loglvl != "" {
+		err := createLogDir(loglvl)
 		if err != nil {
 			return logger, err
 		}
 		// Our logs do not contain sensitive information
 		// so we can create the log file with 0640 permissions
 		// #nosec G302
-		fh, err := os.OpenFile(config.General.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
+		fh, err := os.OpenFile(loglvl, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
 		if err != nil {
 			return logger, err
 		}
@@ -101,6 +101,16 @@ func (l *Logger) Debug(message string) {
 	currTime := time.Now().Format(logFormatString)
 	if l.Level == "debug" && l.Target != nil {
 		_, err := l.Target.WriteString(string(currTime) + " DEBUG: " + message + "\n")
+		if err != nil {
+			log.Println("Failed to write debug message to log:", err)
+		}
+	}
+}
+
+func (l *Logger) Debugf(format string, v ...any) {
+	currTime := time.Now().Format(logFormatString)
+	if l.Level == "debug" && l.Target != nil {
+		_, err := l.Target.WriteString(string(currTime) + " DEBUG: " + fmt.Sprintf(format, v...) + "\n")
 		if err != nil {
 			log.Println("Failed to write debug message to log:", err)
 		}

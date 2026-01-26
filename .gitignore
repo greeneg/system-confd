@@ -33,4 +33,5 @@ go.work.sum
 
 # don't track binary files
 system-confd
+plugins/keyboard/keyboard.plugin
 build/

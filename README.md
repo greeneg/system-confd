@@ -326,3 +326,49 @@ The structure of the three input JSONs are based on the following attributes det
 
 #### Outputs
 
+The outputs of the plugins are also well-defined to ensure that errors, status notifications, and successes can be propagated to whatever client application is sending requests to the service.
+
+A typical response after a request is submitted looks similar to the following:
+
+```json
+{
+    "version": 1,
+    "status": 200,
+    "message": "Success",
+    "hasError": false,
+    "originalRequestUri": "",
+    "error": "",
+}
+```
+
+As can be seen, standard HTTP status codes are used. The 2xx error range is typically a success. The 3xx range for states that are in transition. The 4xx range for requests that are invalid from the client. Finally, the 5xx range denotes serious errors on the host side.
+
+Responses that are errors will contain the error text in the error attribute's value. This typically will be the error message from the service or other aspects for errors in the 5xx range. For the 4xx range, the error will denote why the request is invalid. The 1xx, 2xx, and 3xx range will not supply an error message.
+
+If a task for a plugin will take time and has potentially more data to send to the client, the 202 status code will be returned, and the response will look like the following:
+
+```json
+{
+    "version": 1,
+    "status": 202,
+    "message": "Accepted/Paused",
+    "hasError": false,
+    "originalRequestUri": "socket:///var/lib/system-confd/system-conf.sock/api/v1/hardware/keyboard/apply",
+    "triggerToken": "d37b7a3f-1918-479a-8e07-5d14a27ab9fe",
+    "streamSocket": "/var/lib/system-confd/tmp/sock.AUQSunzs",
+    "error": ""
+}
+```
+
+The `streamSocket` is a socket the client can connect to that will send streamed data from the server to the client. Generally, this will be progress indication information. Note that this requires sending an additional request from the client to the plugin to unpause the task as a way to ensure that the content from the streaming socket is captured. Also note, that it is expected that the client send the unpause request, or the task will hang waiting for permission to unpause the task.
+
+A typical unpause request contains the original request URI and trigger token to validate that the client is "authorized" to request that the task continue. A typical unpause request looks like the following:
+
+```json
+{
+    "version": 1,
+    "action": "continue",
+    "originalRequestUri": "socket:/var/lib/system-confd/system-conf.sock/api/v1/hardware/keyboard/apply",
+    "triggerToken": "d37b7a3f-1918-479a-8e07-5d14a27ab9fe"
+}
+```
